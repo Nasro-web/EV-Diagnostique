@@ -28,3 +28,13 @@ async function setAdminClaim() {
 }
 
 setAdminClaim();
+
+var admin = require("firebase-admin");
+
+var serviceAccount = require("path/to/serviceAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://e-diagnostique-default-rtdb.europe-west1.firebasedatabase.app"
+});
+
