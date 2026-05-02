@@ -1,0 +1,188 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Base */
+body { font-family: 'Inter', sans-serif; }
+
+/* Chart */
+.chart-container {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 300px;
+    max-height: 400px;
+}
+@media (min-width: 768px) {
+    .chart-container { height: 350px; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Radio custom */
+.radio-custom:checked + label {
+    border-color: #2563eb;
+    background-color: #eff6ff;
+    font-weight: 600;
+    color: #1e40af;
+}
+
+/* === Animations & Transitions === */
+
+/* Screen transitions */
+.screen {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+}
+.screen.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Step wizard */
+.step-section {
+    display: none;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.step-section.active {
+    display: block;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Step dots */
+.step-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 2px solid #cbd5e1;
+    color: #94a3b8;
+    background: white;
+    transition: all 0.3s ease;
+}
+.step-dot.active {
+    border-color: #2563eb;
+    color: #2563eb;
+    background: #eff6ff;
+    transform: scale(1.1);
+}
+.step-dot.completed {
+    border-color: #10b981;
+    color: white;
+    background: #10b981;
+}
+
+/* Progress bar */
+.progress-bar {
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    overflow: hidden;
+}
+.progress-bar-fill {
+    height: 100%;
+    background: #2563eb;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+}
+
+/* Radio/select hover animation */
+.option-card {
+    transition: transform 0.15s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+.option-card:hover {
+    transform: scale(1.02);
+}
+
+/* Spinner */
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Score counter animation */
+@keyframes countUp {
+    from { opacity: 0; transform: scale(0.5); }
+    to { opacity: 1; transform: scale(1); }
+}
+.score-animate {
+    animation: countUp 0.6s ease-out forwards;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+.modal-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+.modal-box {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+    transform: scale(0.9);
+    transition: transform 0.2s ease;
+}
+.modal-overlay.show .modal-box {
+    transform: scale(1);
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
+    z-index: 200;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+.toast.success { background: #10b981; }
+.toast.error { background: #ef4444; }
+
+/* Already submitted screen */
+#already-submitted-screen {
+    text-align: center;
+}

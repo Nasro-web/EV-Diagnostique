@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /resultats_2ac/{document} {
+      // Lecture uniquement pour les admins authentifiés avec custom claim
+      allow read: if request.auth != null && request.auth.token.admin == true;
+      // Écriture bloquée côté client - seul Admin SDK (Cloud Functions) peut écrire
+      allow write: if false;
+    }
+    
+    // Bloquer tout accès par défaut
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

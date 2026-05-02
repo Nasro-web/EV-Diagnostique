@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Évaluation Diagnostique - Informatique 2AC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">💻</span>
+                <h1 class="font-bold text-lg text-slate-700 hidden sm:block">Informatique 2AC - Évaluation Diagnostique</h1>
+                <h1 class="font-bold text-lg text-slate-700 sm:hidden">Info 2AC - Test</h1>
+            </div>
+            <div id="timer-container" class="hidden flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1 sm:px-4 sm:py-2 rounded-full font-semibold border border-blue-100 text-sm sm:text-base">
+                <span>⏱️</span>
+                <span id="timer-display">30:00</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-4xl mx-auto w-full px-4 py-6 sm:py-8">
+        
+        <!-- INTRO SCREEN -->
+        <section id="intro-screen" class="screen active bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-100 text-center max-w-2xl mx-auto mt-4 sm:mt-10">
+            <h2 class="text-2xl sm:text-3xl font-bold text-slate-800 mb-4">Évaluation Diagnostique</h2>
+            <p class="text-slate-600 mb-8 text-sm sm:text-base leading-relaxed">
+                Ce test évalue tes connaissances acquises en 1ère année. Assure-toi d'entrer tes informations correctement avant de commencer.
+            </p>
+            
+            <form id="student-info-form" class="space-y-5 text-left bg-slate-50 p-6 rounded-xl border border-slate-100">
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Nom et Prénom</label>
+                        <input type="text" id="student-name" required class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm" placeholder="Ex: Ahmed Alaoui">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Numéro de classement</label>
+                        <input type="number" id="student-number" min="1" max="50" required class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm" placeholder="Ex: 14">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Classe</label>
+                        <select id="student-class" required class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm bg-white">
+                            <option value="">Sélectionner...</option>
+                            <option value="2AC-1">2AC-1</option>
+                            <option value="2AC-2">2AC-2</option>
+                            <option value="2AC-3">2AC-3</option>
+                            <option value="2AC-4">2AC-4</option>
+                            <option value="2AC-5">2AC-5</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex justify-center items-center gap-2 mt-2 shadow-md">
+                    Commencer l'évaluation <span>🚀</span>
+                </button>
+            </form>
+        </section>
+
+        <!-- ALREADY SUBMITTED SCREEN -->
+        <section id="already-submitted-screen" class="screen bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-100 text-center max-w-2xl mx-auto mt-4 sm:mt-10">
+            <div class="inline-block p-4 rounded-full bg-amber-100 text-amber-600 mb-4">
+                <span class="text-4xl">⚠️</span>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-3">Test déjà passé</h2>
+            <p class="text-slate-600 mb-6">Tu as déjà soumis ton évaluation diagnostique. Chaque élève ne peut passer le test qu'une seule fois.</p>
+            <p class="text-sm text-slate-500">Si tu penses qu'il s'agit d'une erreur, contacte ton professeur.</p>
+        </section>
+
+        <!-- ACTIVE TEST SCREEN -->
+        <section id="test-screen" class="screen">
+            <div class="mb-6">
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Évaluation en cours</h2>
+                <div class="bg-blue-50 border border-blue-100 text-blue-800 px-4 py-2 rounded-lg mt-2 inline-block text-sm font-medium" id="student-display-name"></div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mb-6">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex gap-2">
+                        <div class="step-dot active">1</div>
+                        <div class="step-dot">2</div>
+                        <div class="step-dot">3</div>
+                        <div class="step-dot">4</div>
+                        <div class="step-dot">5</div>
+                    </div>
+                    <span class="text-sm text-slate-500 font-medium">Exercice <span id="current-step-label">1</span>/5</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" id="progress-bar-fill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <form id="evaluation-form">
+                
+                <!-- STEP 1: QCM -->
+                <div id="step-1" class="step-section active">
+                    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pb-2 border-b border-slate-100 gap-2">
+                            <h3 class="text-lg font-bold text-slate-800"><span class="text-blue-600 mr-2">Exercice 1</span>QCM (4 pts)</h3>
+                            <span class="text-xs font-semibold bg-slate-100 text-slate-500 px-2 py-1 rounded w-fit">Une seule réponse correcte</span>
+                        </div>
+                        <div class="space-y-6">
+                            <div>
+                                <p class="font-medium text-slate-700 mb-3">1. L'informatique est la science du traitement automatique de l'information par :</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+                                    <div><input type="radio" name="qcm1" id="qcm1_1" value="humain" class="hidden radio-custom" required><label for="qcm1_1" class="block p-3 border border-slate-200 rounded-lg cursor-pointer option-card text-sm sm:text-base">L'être humain</label></div>
+                                    <div><input type="radio" name="qcm1" id="qcm1_2" value="ordinateur" class="hidden radio-custom"><label for="qcm1_2" class="block p-3 border border-slate-200 rounded-lg cursor-pointer option-card text-sm sm:text-base">L'ordinateur</label></div>
+                                    <div><input type="radio" name="qcm1" id="qcm1_3" value="calculatrice" class="hidden radio-custom"><label for="qcm1_3" class="block p-3 border border-slate-200 rounded-lg cursor-pointer option-card text-sm sm:text-base">La calculatrice</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="font-medium text-slate-700 mb-3">2. Lequel de ces éléments est un périphérique de stockage ?</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+                                    <div><input type="radio" name="qcm2" id="qcm2_1" value="clavier" class="hidden radio-custom" required><label for="qcm2_1" class="block p-3 border border-slate-200 rounded-lg cursor-pointer option-card text-sm sm:text-base">Le clavier</label></div>
+                                    <div><input type="radio" name="qcm2" id="qcm2_2" value="imprimante" class="hidden radio-custom"><label for="qcm2_2" class="block p-3 border border-slate-200 rounded-lg cursor-pointer option-card text-sm sm:text-base">L'imprimante</label></div>
+                                    <div><input type="radio" name="qcm2" id="qcm2_3" value="disque_dur" class="hidden radio-custom"><label for="qcm2_3" class="block p-3 border border-slate-200 rounded-lg cursor-pointer option-card text-sm sm:text-base">Le disque dur</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="font-medium text-slate-700 mb-3">3. Quelle est l'extension d'un fichier créé par Microsoft Word ?</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+                                    <div><input type="radio" name="qcm3" id="qcm3_1" value="mp3" class="hidden radio-custom" required><label for="qcm3_1" class="block p-3 border border-slate-200 rounded-lg cursor-pointer option-card text-sm sm:text-base">.mp3</label></div>
+                                    <div><input type="radio" name="qcm3" id="qcm3_2" value="docx" class="hidden radio-custom"><label for="qcm3_2" class="block p-3 border border-slate-200 rounded-lg cursor-pointer option-card text-sm sm:text-base">.docx</label></div>
+                                    <div><input type="radio" name="qcm3" id="qcm3_3" value="exe" class="hidden radio-custom"><label for="qcm3_3" class="block p-3 border border-slate-200 rounded-lg cursor-pointer option-card text-sm sm:text-base">.exe</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="font-medium text-slate-700 mb-3">4. Le cerveau de l'ordinateur qui fait les calculs est :</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+                                    <div><input type="radio" name="qcm4" id="qcm4_1" value="processeur" class="hidden radio-custom" required><label for="qcm4_1" class="block p-3 border border-slate-200 rounded-lg cursor-pointer option-card text-sm sm:text-base">Le processeur</label></div>
+                                    <div><input type="radio" name="qcm4" id="qcm4_2" value="ram" class="hidden radio-custom"><label for="qcm4_2" class="block p-3 border border-slate-200 rounded-lg cursor-pointer option-card text-sm sm:text-base">La mémoire RAM</label></div>
+                                    <div><input type="radio" name="qcm4" id="qcm4_3" value="carte_mere" class="hidden radio-custom"><label for="qcm4_3" class="block p-3 border border-slate-200 rounded-lg cursor-pointer option-card text-sm sm:text-base">La carte mère</label></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Vrai ou Faux -->
+                <div id="step-2" class="step-section">
+                    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+                            <h3 class="text-lg font-bold text-slate-800"><span class="text-blue-600 mr-2">Exercice 2</span>Vrai ou Faux (4 pts)</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse min-w-[400px]">
+                                <thead>
+                                    <tr>
+                                        <th class="pb-3 text-slate-500 font-medium">Affirmation</th>
+                                        <th class="pb-3 text-center text-slate-500 font-medium w-20">Vrai</th>
+                                        <th class="pb-3 text-center text-slate-500 font-medium w-20">Faux</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-slate-700 text-sm sm:text-base">
+                                    <tr>
+                                        <td class="py-4 pr-4">1. L'écran est un périphérique d'entrée.</td>
+                                        <td class="text-center"><input type="radio" name="vf1" value="vrai" required class="w-5 h-5 text-blue-600 cursor-pointer"></td>
+                                        <td class="text-center"><input type="radio" name="vf1" value="faux" class="w-5 h-5 text-blue-600 cursor-pointer"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-4 pr-4">2. Un dossier peut contenir d'autres dossiers.</td>
+                                        <td class="text-center"><input type="radio" name="vf2" value="vrai" required class="w-5 h-5 text-blue-600 cursor-pointer"></td>
+                                        <td class="text-center"><input type="radio" name="vf2" value="faux" class="w-5 h-5 text-blue-600 cursor-pointer"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-4 pr-4">3. Windows est un système d'exploitation.</td>
+                                        <td class="text-center"><input type="radio" name="vf3" value="vrai" required class="w-5 h-5 text-blue-600 cursor-pointer"></td>
+                                        <td class="text-center"><input type="radio" name="vf3" value="faux" class="w-5 h-5 text-blue-600 cursor-pointer"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-4 pr-4">4. Le clavier permet de visualiser les résultats.</td>
+                                        <td class="text-center"><input type="radio" name="vf4" value="vrai" required class="w-5 h-5 text-blue-600 cursor-pointer"></td>
+                                        <td class="text-center"><input type="radio" name="vf4" value="faux" class="w-5 h-5 text-blue-600 cursor-pointer"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3: Association -->
+                <div id="step-3" class="step-section">
+                    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+                            <h3 class="text-lg font-bold text-slate-800"><span class="text-blue-600 mr-2">Exercice 3</span>Association (4 pts)</h3>
+                        </div>
+                        <p class="text-slate-600 mb-4 text-sm sm:text-base">Sélectionnez la catégorie de chaque périphérique :</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 gap-2">
+                                <span class="font-medium text-slate-700">⌨️ Clavier</span>
+                                <select name="assoc1" required class="border border-slate-300 rounded-lg px-3 py-2 bg-white outline-none focus:border-blue-500 w-full sm:w-auto text-sm">
+                                    <option value="">Choisir...</option>
+                                    <option value="entree">Entrée</option>
+                                    <option value="sortie">Sortie</option>
+                                    <option value="stockage">Stockage</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 gap-2">
+                                <span class="font-medium text-slate-700">🖨️ Imprimante</span>
+                                <select name="assoc2" required class="border border-slate-300 rounded-lg px-3 py-2 bg-white outline-none focus:border-blue-500 w-full sm:w-auto text-sm">
+                                    <option value="">Choisir...</option>
+                                    <option value="entree">Entrée</option>
+                                    <option value="sortie">Sortie</option>
+                                    <option value="stockage">Stockage</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 gap-2">
+                                <span class="font-medium text-slate-700">💾 Clé USB</span>
+                                <select name="assoc3" required class="border border-slate-300 rounded-lg px-3 py-2 bg-white outline-none focus:border-blue-500 w-full sm:w-auto text-sm">
+                                    <option value="">Choisir...</option>
+                                    <option value="entree">Entrée</option>
+                                    <option value="sortie">Sortie</option>
+                                    <option value="stockage">Stockage</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 gap-2">
+                                <span class="font-medium text-slate-700">🖱️ Souris</span>
+                                <select name="assoc4" required class="border border-slate-300 rounded-lg px-3 py-2 bg-white outline-none focus:border-blue-500 w-full sm:w-auto text-sm">
+                                    <option value="">Choisir...</option>
+                                    <option value="entree">Entrée</option>
+                                    <option value="sortie">Sortie</option>
+                                    <option value="stockage">Stockage</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 4: Compléter -->
+                <div id="step-4" class="step-section">
+                    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+                            <h3 class="text-lg font-bold text-slate-800"><span class="text-blue-600 mr-2">Exercice 4</span>Compléter (3 pts)</h3>
+                        </div>
+                        <p class="text-slate-600 mb-4 text-sm sm:text-base">Choisissez le bon mot pour compléter la définition de l'ordinateur :</p>
+                        
+                        <div class="p-4 sm:p-6 bg-blue-50 border border-blue-100 rounded-xl text-slate-800 leading-loose flex flex-col gap-3 text-sm sm:text-base">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span>L'ordinateur est une machine</span>
+                                <select name="trou1" required class="border border-blue-300 rounded-lg px-2 py-1 bg-white font-semibold text-blue-700 focus:border-blue-600 outline-none shadow-sm cursor-pointer">
+                                    <option value="">[ Choisir ]</option>
+                                    <option value="mecanique">mécanique</option>
+                                    <option value="electronique">électronique</option>
+                                    <option value="manuelle">manuelle</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span>qui permet le traitement</span>
+                                <select name="trou2" required class="border border-blue-300 rounded-lg px-2 py-1 bg-white font-semibold text-blue-700 focus:border-blue-600 outline-none shadow-sm cursor-pointer">
+                                    <option value="">[ Choisir ]</option>
+                                    <option value="aleatoire">aléatoire</option>
+                                    <option value="manuel">manuel</option>
+                                    <option value="automatique">automatique</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span>de l'</span>
+                                <select name="trou3" required class="border border-blue-300 rounded-lg px-2 py-1 bg-white font-semibold text-blue-700 focus:border-blue-600 outline-none shadow-sm cursor-pointer">
+                                    <option value="">[ Choisir ]</option>
+                                    <option value="energie">énergie</option>
+                                    <option value="information">information</option>
+                                    <option value="image">image</option>
+                                </select>
+                                <span>.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 5: Logiciels -->
+                <div id="step-5" class="step-section">
+                    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+                            <h3 class="text-lg font-bold text-slate-800"><span class="text-blue-600 mr-2">Exercice 5</span>Logiciels (5 pts)</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <p class="text-slate-600 text-sm sm:text-base">Sélectionnez les bons éléments :</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="p-4 border border-slate-200 rounded-xl bg-slate-50">
+                                    <label class="block font-medium text-slate-700 mb-2 text-sm sm:text-base">Lequel de ces choix est un Système d'Exploitation pour PC ?</label>
+                                    <select name="qd1" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer shadow-sm">
+                                        <option value="">Sélectionner un système...</option>
+                                        <option value="word">Microsoft Word</option>
+                                        <option value="windows">Windows</option>
+                                        <option value="chrome">Google Chrome</option>
+                                        <option value="paint">Paint</option>
+                                    </select>
+                                </div>
+                                <div class="p-4 border border-slate-200 rounded-xl bg-slate-50">
+                                    <label class="block font-medium text-slate-700 mb-2 text-sm sm:text-base">Lequel de ces choix est un Système d'Exploitation pour Smartphone ?</label>
+                                    <select name="qd2" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer shadow-sm">
+                                        <option value="">Sélectionner un système...</option>
+                                        <option value="android">Android</option>
+                                        <option value="whatsapp">WhatsApp</option>
+                                        <option value="ecran">L'Écran tactile</option>
+                                        <option value="excel">Excel</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="flex justify-between items-center pt-6 pb-12">
+                    <button type="button" id="prev-btn" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-3 px-6 rounded-xl transition-all">
+                        ← Précédent
+                    </button>
+                    <button type="button" id="next-btn" class="ml-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all">
+                        Suivant →
+                    </button>
+                    <div id="submit-container" class="hidden ml-auto">
+                        <button type="submit" id="submit-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2">
+                            <span id="submit-text">Terminer et Envoyer</span> <span>✅</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- RESULTS SCREEN -->
+        <section id="results-screen" class="screen">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-100 mb-6 text-center">
+                <div class="inline-block p-4 rounded-full bg-emerald-100 text-emerald-600 mb-4">
+                    <span class="text-4xl">🏆</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">Évaluation Terminée !</h2>
+                <p class="text-slate-600 mb-6">Merci pour ton effort, <span id="res-name" class="font-semibold text-slate-800"></span>.</p>
+                
+                <div class="flex flex-col md:flex-row justify-center items-center gap-6 sm:gap-8 mb-8">
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 w-full md:w-1/3">
+                        <p class="text-sm text-slate-500 uppercase tracking-wide font-semibold mb-1">Score Final</p>
+                        <div class="text-5xl font-extrabold text-blue-600">
+                            <span id="final-score">0</span><span class="text-2xl text-slate-400">/20</span>
+                        </div>
+                        <p id="score-feedback" class="mt-3 text-sm font-medium text-slate-600"></p>
+                    </div>
+                    <div class="w-full md:w-2/3 max-w-[400px]">
+                        <p class="text-sm font-semibold text-slate-600 mb-2">Analyse des compétences</p>
+                        <div class="chart-container">
+                            <canvas id="skillsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <p id="db-status" class="text-sm text-slate-600 font-medium bg-slate-50 py-2 px-4 rounded-lg inline-block border border-slate-200">
+                    Chargement du statut d'enregistrement...
+                </p>
+            </div>
+
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-100">
+                <h3 class="text-xl font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">Détails des points</h3>
+                <div class="space-y-3 text-sm sm:text-base">
+                    <div class="flex justify-between items-center p-3 sm:p-4 rounded-lg bg-slate-50 border border-slate-100">
+                        <span class="font-medium text-slate-700">Exercice 1 (QCM)</span>
+                        <span id="score-ex1" class="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded"></span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 sm:p-4 rounded-lg bg-slate-50 border border-slate-100">
+                        <span class="font-medium text-slate-700">Exercice 2 (Vrai/Faux)</span>
+                        <span id="score-ex2" class="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded"></span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 sm:p-4 rounded-lg bg-slate-50 border border-slate-100">
+                        <span class="font-medium text-slate-700">Exercice 3 (Association)</span>
+                        <span id="score-ex3" class="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded"></span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 sm:p-4 rounded-lg bg-slate-50 border border-slate-100">
+                        <span class="font-medium text-slate-700">Exercice 4 (Texte à trous)</span>
+                        <span id="score-ex4" class="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded"></span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 sm:p-4 rounded-lg bg-slate-50 border border-slate-100">
+                        <span class="font-medium text-slate-700">Exercice 5 (Logiciels)</span>
+                        <span id="score-ex5" class="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center pb-8">
+                <button onclick="location.reload()" class="text-slate-500 hover:text-blue-600 underline font-medium transition-colors">Retour à l'accueil</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal de confirmation -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-box text-center">
+            <p id="modal-text" class="text-lg font-medium text-slate-800 mb-6"></p>
+            <div class="flex gap-3 justify-center">
+                <button id="modal-cancel" class="px-5 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 font-medium transition-colors">Annuler</button>
+                <button id="modal-confirm" class="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium transition-colors">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

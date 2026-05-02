@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Évaluation Diagnostique - Informatique 2AC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container { height: 350px; }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .radio-custom:checked + label {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+            font-weight: 600;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">💻</span>
+                <h1 class="font-bold text-lg text-slate-700 hidden sm:block">Informatique 2AC - Évaluation Diagnostique</h1>
+                <h1 class="font-bold text-lg text-slate-700 sm:hidden">Info 2AC - Test</h1>
+            </div>
+            <div id="timer-container" class="hidden flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1 sm:px-4 sm:py-2 rounded-full font-semibold border border-blue-100 text-sm sm:text-base">
+                <span>⏱️</span>
+                <span id="timer-display">30:00</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-4xl mx-auto w-full px-4 py-6 sm:py-8">
+        
+        <!-- INTRO SCREEN -->
+        <section id="intro-screen" class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-100 text-center max-w-2xl mx-auto mt-4 sm:mt-10">
+            <h2 class="text-2xl sm:text-3xl font-bold text-slate-800 mb-4">Évaluation Diagnostique</h2>
+            <p class="text-slate-600 mb-8 text-sm sm:text-base leading-relaxed">
+                Ce test évalue tes connaissances acquises en 1ère année. Assure-toi d'entrer tes informations correctement avant de commencer.
+            </p>
+            
+            <form id="student-info-form" class="space-y-5 text-left bg-slate-50 p-6 rounded-xl border border-slate-100">
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Nom et Prénom</label>
+                        <input type="text" id="student-name" required class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm" placeholder="Ex: Ahmed Alaoui">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Numéro de classement</label>
+                        <input type="number" id="student-number" min="1" max="50" required class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm" placeholder="Ex: 14">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Classe</label>
+                        <select id="student-class" required class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm bg-white">
+                            <option value="">Sélectionner...</option>
+                            <option value="2AC-1">2AC-1</option>
+                            <option value="2AC-2">2AC-2</option>
+                            <option value="2AC-3">2AC-3</option>
+                            <option value="2AC-4">2AC-4</option>
+                            <option value="2AC-5">2AC-5</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex justify-center items-center gap-2 mt-2 shadow-md">
+                    Commencer l'évaluation <span>🚀</span>
+                </button>
+            </form>
+        </section>
+
+        <!-- ACTIVE TEST SCREEN -->
+        <section id="test-screen" class="hidden">
+            <div class="mb-6">
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Évaluation en cours</h2>
+                <div class="bg-blue-50 border border-blue-100 text-blue-800 px-4 py-2 rounded-lg mt-2 inline-block text-sm font-medium" id="student-display-name"></div>
+            </div>
+
+            <form id="evaluation-form">
+                
+                <!-- Ex 1: QCM -->
+                <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-100 mb-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pb-2 border-b border-slate-100 gap-2">
+                        <h3 class="text-lg font-bold text-slate-800"><span class="text-blue-600 mr-2">Exercice 1</span>QCM (4 pts)</h3>
+                        <span class="text-xs font-semibold bg-slate-100 text-slate-500 px-2 py-1 rounded w-fit">Une seule réponse correcte</span>
+                    </div>
+                    <div class="space-y-6">
+                        <div>
+                            <p class="font-medium text-slate-700 mb-3">1. L'informatique est la science du traitement automatique de l'information par :</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+                                <div><input type="radio" name="qcm1" id="qcm1_1" value="0" class="hidden radio-custom" required><label for="qcm1_1" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-sm sm:text-base">L'être humain</label></div>
+                                <div><input type="radio" name="qcm1" id="qcm1_2" value="1" class="hidden radio-custom"><label for="qcm1_2" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-sm sm:text-base">L'ordinateur</label></div>
+                                <div><input type="radio" name="qcm1" id="qcm1_3" value="0" class="hidden radio-custom"><label for="qcm1_3" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-sm sm:text-base">La calculatrice</label></div>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="font-medium text-slate-700 mb-3">2. Lequel de ces éléments est un périphérique de stockage ?</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+                                <div><input type="radio" name="qcm2" id="qcm2_1" value="0" class="hidden radio-custom" required><label for="qcm2_1" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-sm sm:text-base">Le clavier</label></div>
+                                <div><input type="radio" name="qcm2" id="qcm2_2" value="0" class="hidden radio-custom"><label for="qcm2_2" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-sm sm:text-base">L'imprimante</label></div>
+                                <div><input type="radio" name="qcm2" id="qcm2_3" value="1" class="hidden radio-custom"><label for="qcm2_3" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-sm sm:text-base">Le disque dur</label></div>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="font-medium text-slate-700 mb-3">3. Quelle est l'extension d'un fichier créé par Microsoft Word ?</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+                                <div><input type="radio" name="qcm3" id="qcm3_1" value="0" class="hidden radio-custom" required><label for="qcm3_1" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-sm sm:text-base">.mp3</label></div>
+                                <div><input type="radio" name="qcm3" id="qcm3_2" value="1" class="hidden radio-custom"><label for="qcm3_2" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-sm sm:text-base">.docx</label></div>
+                                <div><input type="radio" name="qcm3" id="qcm3_3" value="0" class="hidden radio-custom"><label for="qcm3_3" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-sm sm:text-base">.exe</label></div>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="font-medium text-slate-700 mb-3">4. Le cerveau de l'ordinateur qui fait les calculs est :</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+                                <div><input type="radio" name="qcm4" id="qcm4_1" value="1" class="hidden radio-custom" required><label for="qcm4_1" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-sm sm:text-base">Le processeur</label></div>
+                                <div><input type="radio" name="qcm4" id="qcm4_2" value="0" class="hidden radio-custom"><label for="qcm4_2" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-sm sm:text-base">La mémoire RAM</label></div>
+                                <div><input type="radio" name="qcm4" id="qcm4_3" value="0" class="hidden radio-custom"><label for="qcm4_3" class="block p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors text-sm sm:text-base">La carte mère</label></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ex 2: Vrai ou Faux -->
+                <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-100 mb-6 overflow-hidden">
+                    <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+                        <h3 class="text-lg font-bold text-slate-800"><span class="text-blue-600 mr-2">Exercice 2</span>Vrai ou Faux (4 pts)</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[400px]">
+                            <thead>
+                                <tr>
+                                    <th class="pb-3 text-slate-500 font-medium">Affirmation</th>
+                                    <th class="pb-3 text-center text-slate-500 font-medium w-20">Vrai</th>
+                                    <th class="pb-3 text-center text-slate-500 font-medium w-20">Faux</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-slate-700 text-sm sm:text-base">
+                                <tr>
+                                    <td class="py-4 pr-4">1. L'écran est un périphérique d'entrée.</td>
+                                    <td class="text-center"><input type="radio" name="vf1" value="0" required class="w-5 h-5 text-blue-600 cursor-pointer"></td>
+                                    <td class="text-center"><input type="radio" name="vf1" value="1" class="w-5 h-5 text-blue-600 cursor-pointer"></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 pr-4">2. Un dossier peut contenir d'autres dossiers.</td>
+                                    <td class="text-center"><input type="radio" name="vf2" value="1" required class="w-5 h-5 text-blue-600 cursor-pointer"></td>
+                                    <td class="text-center"><input type="radio" name="vf2" value="0" class="w-5 h-5 text-blue-600 cursor-pointer"></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 pr-4">3. Windows est un système d'exploitation.</td>
+                                    <td class="text-center"><input type="radio" name="vf3" value="1" required class="w-5 h-5 text-blue-600 cursor-pointer"></td>
+                                    <td class="text-center"><input type="radio" name="vf3" value="0" class="w-5 h-5 text-blue-600 cursor-pointer"></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 pr-4">4. Le clavier permet de visualiser les résultats.</td>
+                                    <td class="text-center"><input type="radio" name="vf4" value="0" required class="w-5 h-5 text-blue-600 cursor-pointer"></td>
+                                    <td class="text-center"><input type="radio" name="vf4" value="1" class="w-5 h-5 text-blue-600 cursor-pointer"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Ex 3: Association -->
+                <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-100 mb-6">
+                    <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+                        <h3 class="text-lg font-bold text-slate-800"><span class="text-blue-600 mr-2">Exercice 3</span>Association (4 pts)</h3>
+                    </div>
+                    <p class="text-slate-600 mb-4 text-sm sm:text-base">Sélectionnez la catégorie de chaque périphérique :</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 gap-2">
+                            <span class="font-medium text-slate-700">⌨️ Clavier</span>
+                            <select name="assoc1" required class="border border-slate-300 rounded-lg px-3 py-2 bg-white outline-none focus:border-blue-500 w-full sm:w-auto text-sm">
+                                <option value="">Choisir...</option>
+                                <option value="entree">Entrée</option>
+                                <option value="sortie">Sortie</option>
+                                <option value="stockage">Stockage</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 gap-2">
+                            <span class="font-medium text-slate-700">🖨️ Imprimante</span>
+                            <select name="assoc2" required class="border border-slate-300 rounded-lg px-3 py-2 bg-white outline-none focus:border-blue-500 w-full sm:w-auto text-sm">
+                                <option value="">Choisir...</option>
+                                <option value="entree">Entrée</option>
+                                <option value="sortie">Sortie</option>
+                                <option value="stockage">Stockage</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 gap-2">
+                            <span class="font-medium text-slate-700">💾 Clé USB</span>
+                            <select name="assoc3" required class="border border-slate-300 rounded-lg px-3 py-2 bg-white outline-none focus:border-blue-500 w-full sm:w-auto text-sm">
+                                <option value="">Choisir...</option>
+                                <option value="entree">Entrée</option>
+                                <option value="sortie">Sortie</option>
+                                <option value="stockage">Stockage</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 gap-2">
+                            <span class="font-medium text-slate-700">🖱️ Souris</span>
+                            <select name="assoc4" required class="border border-slate-300 rounded-lg px-3 py-2 bg-white outline-none focus:border-blue-500 w-full sm:w-auto text-sm">
+                                <option value="">Choisir...</option>
+                                <option value="entree">Entrée</option>
+                                <option value="sortie">Sortie</option>
+                                <option value="stockage">Stockage</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ex 4: Choix multiples (Remplacé le texte à trous) -->
+                <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-100 mb-6">
+                    <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+                        <h3 class="text-lg font-bold text-slate-800"><span class="text-blue-600 mr-2">Exercice 4</span>Compléter (3 pts)</h3>
+                    </div>
+                    <p class="text-slate-600 mb-4 text-sm sm:text-base">Choisissez le bon mot pour compléter la définition de l'ordinateur :</p>
+                    
+                    <div class="p-4 sm:p-6 bg-blue-50 border border-blue-100 rounded-xl text-slate-800 leading-loose flex flex-col gap-3 text-sm sm:text-base">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span>L'ordinateur est une machine</span>
+                            <select name="trou1" required class="border border-blue-300 rounded-lg px-2 py-1 bg-white font-semibold text-blue-700 focus:border-blue-600 outline-none shadow-sm cursor-pointer">
+                                <option value="">[ Choisir ]</option>
+                                <option value="mecanique">mécanique</option>
+                                <option value="electronique">électronique</option>
+                                <option value="manuelle">manuelle</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span>qui permet le traitement</span>
+                            <select name="trou2" required class="border border-blue-300 rounded-lg px-2 py-1 bg-white font-semibold text-blue-700 focus:border-blue-600 outline-none shadow-sm cursor-pointer">
+                                <option value="">[ Choisir ]</option>
+                                <option value="aleatoire">aléatoire</option>
+                                <option value="manuel">manuel</option>
+                                <option value="automatique">automatique</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span>de l'</span>
+                            <select name="trou3" required class="border border-blue-300 rounded-lg px-2 py-1 bg-white font-semibold text-blue-700 focus:border-blue-600 outline-none shadow-sm cursor-pointer">
+                                <option value="">[ Choisir ]</option>
+                                <option value="energie">énergie</option>
+                                <option value="information">information</option>
+                                <option value="image">image</option>
+                            </select>
+                            <span>.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ex 5: Question directe -> Listes déroulantes -->
+                <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-100 mb-6">
+                    <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+                        <h3 class="text-lg font-bold text-slate-800"><span class="text-blue-600 mr-2">Exercice 5</span>Logiciels (5 pts)</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <p class="text-slate-600 text-sm sm:text-base">Sélectionnez les bons éléments :</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 border border-slate-200 rounded-xl bg-slate-50">
+                                <label class="block font-medium text-slate-700 mb-2 text-sm sm:text-base">Lequel de ces choix est un Système d'Exploitation pour PC ?</label>
+                                <select name="qd1" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer shadow-sm">
+                                    <option value="">Sélectionner un système...</option>
+                                    <option value="word">Microsoft Word</option>
+                                    <option value="windows">Windows</option>
+                                    <option value="chrome">Google Chrome</option>
+                                    <option value="paint">Paint</option>
+                                </select>
+                            </div>
+                            <div class="p-4 border border-slate-200 rounded-xl bg-slate-50">
+                                <label class="block font-medium text-slate-700 mb-2 text-sm sm:text-base">Lequel de ces choix est un Système d'Exploitation pour Smartphone ?</label>
+                                <select name="qd2" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer shadow-sm">
+                                    <option value="">Sélectionner un système...</option>
+                                    <option value="android">Android</option>
+                                    <option value="whatsapp">WhatsApp</option>
+                                    <option value="ecran">L'Écran tactile</option>
+                                    <option value="excel">Excel</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-center sm:justify-end pt-4 pb-12">
+                    <button type="submit" id="submit-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all flex justify-center items-center gap-2">
+                        <span id="submit-text">Terminer et Envoyer</span> <span id="submit-icon" class="text-xl">✅</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- RESULTS SCREEN -->
+        <section id="results-screen" class="hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-100 mb-6 text-center">
+                <div class="inline-block p-4 rounded-full bg-emerald-100 text-emerald-600 mb-4">
+                    <span class="text-4xl">🏆</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">Évaluation Terminée !</h2>
+                <p class="text-slate-600 mb-6">Merci pour ton effort, <span id="res-name" class="font-semibold text-slate-800"></span>.</p>
+                
+                <div class="flex flex-col md:flex-row justify-center items-center gap-6 sm:gap-8 mb-8">
+                    <!-- Score Card -->
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 w-full md:w-1/3">
+                        <p class="text-sm text-slate-500 uppercase tracking-wide font-semibold mb-1">Score Final</p>
+                        <div class="text-5xl font-extrabold text-blue-600">
+                            <span id="final-score">0</span><span class="text-2xl text-slate-400">/20</span>
+                        </div>
+                        <p id="score-feedback" class="mt-3 text-sm font-medium text-slate-600"></p>
+                    </div>
+
+                    <!-- Radar Chart -->
+                    <div class="w-full md:w-2/3 max-w-[400px]">
+                        <p class="text-sm font-semibold text-slate-600 mb-2">Analyse des compétences</p>
+                        <div class="chart-container">
+                            <canvas id="skillsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <p id="db-status" class="text-sm text-slate-600 font-medium bg-slate-50 py-2 px-4 rounded-lg inline-block border border-slate-200">
+                    Chargement du statut d'enregistrement...
+                </p>
+            </div>
+
+            <!-- Detailed Correction -->
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-100">
+                <h3 class="text-xl font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">Détails des points</h3>
+                <div class="space-y-3 text-sm sm:text-base">
+                    <div class="flex justify-between items-center p-3 sm:p-4 rounded-lg bg-slate-50 border border-slate-100">
+                        <span class="font-medium text-slate-700">Exercice 1 (QCM)</span>
+                        <span id="score-ex1" class="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded"></span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 sm:p-4 rounded-lg bg-slate-50 border border-slate-100">
+                        <span class="font-medium text-slate-700">Exercice 2 (Vrai/Faux)</span>
+                        <span id="score-ex2" class="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded"></span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 sm:p-4 rounded-lg bg-slate-50 border border-slate-100">
+                        <span class="font-medium text-slate-700">Exercice 3 (Association)</span>
+                        <span id="score-ex3" class="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded"></span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 sm:p-4 rounded-lg bg-slate-50 border border-slate-100">
+                        <span class="font-medium text-slate-700">Exercice 4 (Texte à trous)</span>
+                        <span id="score-ex4" class="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded"></span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 sm:p-4 rounded-lg bg-slate-50 border border-slate-100">
+                        <span class="font-medium text-slate-700">Exercice 5 (Logiciels)</span>
+                        <span id="score-ex5" class="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center pb-8">
+                <button onclick="location.reload()" class="text-slate-500 hover:text-blue-600 underline font-medium transition-colors">Retour à l'accueil</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FIREBASE SCRIPT (Modulaire V9) -->
+    <script type="module">
+        // 1. Importation de tes identifiants Firebase fournis
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Ton application e-diagnostique
+        const firebaseConfig = {
+            apiKey: "AIzaSyDmvBWS3jVTt6oJXLCXFSLDnE2EjrOyKs8",
+            authDomain: "e-diagnostique.firebaseapp.com",
+            databaseURL: "https://e-diagnostique-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "e-diagnostique",
+            storageBucket: "e-diagnostique.firebasestorage.app",
+            messagingSenderId: "1001086323729",
+            appId: "1:1001086323729:web:4a7340258d28c37046b5b0",
+            measurementId: "G-MGHFVD28ES"
+        };
+
+        // Initialisation Firestore
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- Variables Globales ---
+        let timerInterval;
+        let timeLeft = 30 * 60; // 30 minutes
+        let studentData = { name: '', class: '', number: '' };
+        let scores = { ex1: 0, ex2: 0, ex3: 0, ex4: 0, ex5: 0, total: 0 };
+        let chartInstance = null;
+
+        // --- DOM Elements ---
+        const introScreen = document.getElementById('intro-screen');
+        const testScreen = document.getElementById('test-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const timerContainer = document.getElementById('timer-container');
+        const timerDisplay = document.getElementById('timer-display');
+        const studentInfoForm = document.getElementById('student-info-form');
+        const evaluationForm = document.getElementById('evaluation-form');
+        const submitBtn = document.getElementById('submit-btn');
+
+        // --- Événements ---
+        studentInfoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            studentData.name = document.getElementById('student-name').value;
+            studentData.number = document.getElementById('student-number').value;
+            studentData.class = document.getElementById('student-class').value;
+            
+            document.getElementById('student-display-name').textContent = `N°${studentData.number} | ${studentData.name} | ${studentData.class}`;
+            startTest();
+        });
+
+        evaluationForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if(confirm("Confirmer l'envoi de vos réponses ?")) {
+                clearInterval(timerInterval);
+                processEvaluation();
+            }
+        });
+
+        // --- Fonctions ---
+        function startTest() {
+            introScreen.classList.add('hidden');
+            testScreen.classList.remove('hidden');
+            timerContainer.classList.remove('hidden');
+            window.scrollTo(0, 0);
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Temps écoulé ! L'évaluation va être soumise automatiquement.");
+                    processEvaluation();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if(timeLeft < 300) {
+                timerContainer.classList.remove('bg-blue-50', 'text-blue-700', 'border-blue-100');
+                timerContainer.classList.add('bg-rose-50', 'text-rose-700', 'border-rose-200', 'animate-pulse');
+            }
+        }
+
+        async function processEvaluation() {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            document.getElementById('submit-text').textContent = "Enregistrement en cours...";
+            document.getElementById('submit-icon').textContent = "⏳";
+            document.getElementById('submit-icon').classList.add('animate-spin');
+
+            const formData = new FormData(evaluationForm);
+            scores = { ex1: 0, ex2: 0, ex3: 0, ex4: 0, ex5: 0, total: 0 };
+            
+            let cats = { 
+                materiel: { score: 0, max: 7 },
+                logiciel: { score: 0, max: 8 },
+                generalite: { score: 0, max: 5 }
+            };
+
+            // Correction Ex 1 (QCM) 
+            if(formData.get('qcm1') === '1') { scores.ex1++; cats.generalite.score++; }
+            if(formData.get('qcm2') === '1') { scores.ex1++; cats.materiel.score++; }
+            if(formData.get('qcm3') === '1') { scores.ex1++; cats.logiciel.score++; }
+            if(formData.get('qcm4') === '1') { scores.ex1++; cats.materiel.score++; }
+
+            // Correction Ex 2 (V/F)
+            if(formData.get('vf1') === '1') { scores.ex2++; cats.materiel.score++; } // Faux
+            if(formData.get('vf2') === '1') { scores.ex2++; cats.logiciel.score++; } // Vrai
+            if(formData.get('vf3') === '1') { scores.ex2++; cats.logiciel.score++; } // Vrai
+            if(formData.get('vf4') === '1') { scores.ex2++; cats.materiel.score++; } // Faux
+
+            // Correction Ex 3 (Association)
+            if(formData.get('assoc1') === 'entree') { scores.ex3++; cats.materiel.score++; }
+            if(formData.get('assoc2') === 'sortie') { scores.ex3++; cats.materiel.score++; }
+            if(formData.get('assoc3') === 'stockage') { scores.ex3++; cats.materiel.score++; }
+            if(formData.get('assoc4') === 'entree') { scores.ex3++; cats.materiel.score++; }
+
+            // Correction Ex 4 (Listes)
+            if(formData.get('trou1') === 'electronique') { scores.ex4++; cats.generalite.score++; }
+            if(formData.get('trou2') === 'automatique') { scores.ex4++; cats.generalite.score++; }
+            if(formData.get('trou3') === 'information') { scores.ex4++; cats.generalite.score++; }
+
+            // Correction Ex 5 (Listes)
+            if(formData.get('qd1') === 'windows') { scores.ex5 += 2.5; cats.logiciel.score += 2.5; }
+            if(formData.get('qd2') === 'android') { scores.ex5 += 2.5; cats.logiciel.score += 2.5; }
+
+            scores.total = scores.ex1 + scores.ex2 + scores.ex3 + scores.ex4 + scores.ex5;
+
+            const matPct = Math.round((cats.materiel.score / cats.materiel.max) * 100);
+            const logPct = Math.round((cats.logiciel.score / cats.logiciel.max) * 100);
+            const genPct = Math.round((cats.generalite.score / cats.generalite.max) * 100);
+
+            // SAUVEGARDE SUR TON PROJET FIREBASE FIRESTORE
+            try {
+                // Création d'une collection claire 'resultats_2ac' dans ta base
+                const docRef = await addDoc(collection(db, "resultats_2ac"), {
+                    nom: studentData.name,
+                    numero: parseInt(studentData.number),
+                    classe: studentData.class,
+                    scoreTotal: scores.total,
+                    details: {
+                        ex1: scores.ex1,
+                        ex2: scores.ex2,
+                        ex3: scores.ex3,
+                        ex4: scores.ex4,
+                        ex5: scores.ex5
+                    },
+                    acquisition: {
+                        materiel: matPct,
+                        logiciel: logPct,
+                        generalites: genPct
+                    },
+                    dateEnvoi: serverTimestamp()
+                });
+                
+                document.getElementById('db-status').className = "text-sm text-emerald-600 font-medium bg-emerald-50 py-2 px-4 rounded-lg inline-block border border-emerald-100";
+                document.getElementById('db-status').innerHTML = "✅ Données sauvegardées dans Firestore avec succès !";
+            } catch (err) {
+                console.error("Erreur Firebase:", err);
+                document.getElementById('db-status').className = "text-sm text-amber-600 font-medium bg-amber-50 py-2 px-4 rounded-lg inline-block border border-amber-200 mt-4";
+                document.getElementById('db-status').innerHTML = "⚠️ Impossible de se connecter à Firebase. As-tu bien autorisé l'accès en écriture dans tes règles Firestore ?";
+            }
+
+            showResults(matPct, logPct, genPct);
+        }
+
+        function showResults(matPct, logPct, genPct) {
+            testScreen.classList.add('hidden');
+            timerContainer.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            window.scrollTo(0, 0);
+
+            document.getElementById('res-name').textContent = studentData.name;
+            document.getElementById('final-score').textContent = scores.total;
+            
+            let feedback = "";
+            if(scores.total >= 16) feedback = "Excellent ! Très bonnes bases.";
+            else if(scores.total >= 10) feedback = "Niveau moyen. Quelques révisions nécessaires.";
+            else feedback = "Bases fragiles. Une révision est recommandée.";
+            document.getElementById('score-feedback').textContent = feedback;
+
+            document.getElementById('score-ex1').textContent = `${scores.ex1} / 4 pts`;
+            document.getElementById('score-ex2').textContent = `${scores.ex2} / 4 pts`;
+            document.getElementById('score-ex3').textContent = `${scores.ex3} / 4 pts`;
+            document.getElementById('score-ex4').textContent = `${scores.ex4} / 3 pts`;
+            document.getElementById('score-ex5').textContent = `${scores.ex5} / 5 pts`;
+
+            renderChart(matPct, logPct, genPct);
+        }
+
+        function renderChart(matPct, logPct, genPct) {
+            const ctx = document.getElementById('skillsChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Matériel', 'Logiciels', 'Généralités'],
+                    datasets: [{
+                        label: 'Acquisition (%)',
+                        data: [matPct, logPct, genPct],
+                        backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                        borderColor: 'rgba(37, 99, 235, 1)',
+                        pointBackgroundColor: 'rgba(37, 99, 235, 1)',
+                        pointBorderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            pointLabels: { font: { size: 11, family: "'Inter', sans-serif" }, color: '#475569' },
+                            ticks: { min: 0, max: 100, display: false }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - E-Diagnostique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
+
+    <!-- LOGIN SCREEN -->
+    <section id="login-screen" class="min-h-screen flex items-center justify-center px-4">
+        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 w-full max-w-sm">
+            <div class="text-center mb-6">
+                <span class="text-3xl">🔐</span>
+                <h1 class="text-2xl font-bold text-slate-800 mt-2">Espace Enseignant</h1>
+                <p class="text-slate-500 text-sm mt-1">Connectez-vous pour accéder au tableau de bord</p>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                    <input type="email" id="admin-email" required class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="admin@e-diagnostique.ma">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Mot de passe</label>
+                    <input type="password" id="admin-password" required class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="••••••••">
+                </div>
+                <p id="login-error" class="hidden text-sm text-rose-600 font-medium"></p>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors">
+                    Se connecter
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- DASHBOARD SCREEN -->
+    <section id="dashboard-screen" class="hidden">
+        <!-- Header -->
+        <header class="bg-white shadow-sm sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">📊</span>
+                    <h1 class="font-bold text-lg text-slate-700">E-Diagnostique - Dashboard</h1>
+                </div>
+                <button id="logout-btn" class="text-sm text-slate-500 hover:text-rose-600 font-medium transition-colors">
+                    Déconnexion ↗
+                </button>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <!-- Filters -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Résultats des élèves</h2>
+                <div class="flex items-center gap-3">
+                    <select id="class-filter" class="border border-slate-300 rounded-lg px-4 py-2 bg-white focus:border-blue-500 outline-none text-sm font-medium">
+                        <option value="all">Toutes les classes</option>
+                        <option value="2AC-1">2AC-1</option>
+                        <option value="2AC-2">2AC-2</option>
+                        <option value="2AC-3">2AC-3</option>
+                        <option value="2AC-4">2AC-4</option>
+                        <option value="2AC-5">2AC-5</option>
+                    </select>
+                    <button id="export-csv-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+                        📥 Exporter CSV
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPIs -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                    <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold">Total élèves</p>
+                    <p id="kpi-total" class="text-3xl font-bold text-slate-800 mt-1">-</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                    <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold">Moyenne</p>
+                    <p id="kpi-avg" class="text-3xl font-bold text-blue-600 mt-1">-</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                    <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold">Note Max</p>
+                    <p id="kpi-max" class="text-3xl font-bold text-emerald-600 mt-1">-</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                    <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold">Note Min</p>
+                    <p id="kpi-min" class="text-3xl font-bold text-rose-600 mt-1">-</p>
+                </div>
+            </div>
+
+            <!-- Competence KPIs -->
+            <div class="grid grid-cols-3 gap-4 mb-8">
+                <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-center">
+                    <p class="text-xs text-slate-500 uppercase font-semibold">Matériel</p>
+                    <p id="kpi-materiel" class="text-2xl font-bold text-blue-600 mt-1">-</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-center">
+                    <p class="text-xs text-slate-500 uppercase font-semibold">Logiciel</p>
+                    <p id="kpi-logiciel" class="text-2xl font-bold text-blue-600 mt-1">-</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-center">
+                    <p class="text-xs text-slate-500 uppercase font-semibold">Généralités</p>
+                    <p id="kpi-general" class="text-2xl font-bold text-blue-600 mt-1">-</p>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
+                    <h3 class="font-semibold text-slate-700 mb-4">Distribution des notes</h3>
+                    <div style="height: 250px;">
+                        <canvas id="chart-distribution"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
+                    <h3 class="font-semibold text-slate-700 mb-4">Compétences moyennes</h3>
+                    <div style="height: 250px;">
+                        <canvas id="chart-competences"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-slate-50 border-b border-slate-200">
+                            <tr>
+                                <th class="py-3 px-2 text-left text-xs font-semibold text-slate-500 uppercase">#</th>
+                                <th class="py-3 px-2 text-left text-xs font-semibold text-slate-500 uppercase">Nom</th>
+                                <th class="py-3 px-2 text-center text-xs font-semibold text-slate-500 uppercase">N°</th>
+                                <th class="py-3 px-2 text-center text-xs font-semibold text-slate-500 uppercase">Classe</th>
+                                <th class="py-3 px-2 text-center text-xs font-semibold text-slate-500 uppercase">Score</th>
+                                <th class="py-3 px-2 text-center text-xs font-semibold text-slate-500 uppercase">Mat.</th>
+                                <th class="py-3 px-2 text-center text-xs font-semibold text-slate-500 uppercase">Log.</th>
+                                <th class="py-3 px-2 text-center text-xs font-semibold text-slate-500 uppercase">Gén.</th>
+                                <th class="py-3 px-2 text-left text-xs font-semibold text-slate-500 uppercase">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <script type="module" src="js/admin.js"></script>
+</body>
+</html>
